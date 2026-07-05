@@ -10,6 +10,15 @@ Common solutions to this problem tend to over-engineer it: auto-loading every pa
 
 ## The solution
 
+```
+your-project/
+└── docs/
+    └── memory/
+        ├── README.md         ← workflow reference
+        ├── facts.md          ← curated durable truths (~50 lines max)
+        └── memory-log.jsonl  ← append-only chronological event log
+```
+
 Two plain-text files in your repo:
 
 - **`docs/memory/facts.md`** — curated durable truths that stay relevant (max ~50 lines)
@@ -59,6 +68,8 @@ Kept under ~50 lines. When it grows, the oldest entries get archived to memory-l
 Append-only, so git merges cleanly across devices. Each line has a `type` (completion, decision, pitfall, fact-archive, log) and a grep-able `summary`.
 
 ## Commands cheat sheet
+
+Your coding agent runs these automatically — triggered by your request to save memory, search context, or recall past sessions. You don't type them yourself.
 
 | What | Command |
 |------|---------|
