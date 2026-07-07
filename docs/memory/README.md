@@ -64,6 +64,12 @@ Log entries with a `summary` field are grep-able — search for feature names, e
 echo '{"date":"2026-07-04","type":"pitfall","summary":"Test runner --watch doesn't pick up new files without restart"}' >> docs/memory/memory-log.jsonl
 ```
 
+**Pitfall:** if the file ever loses its trailing newline (some editors strip it), the next `echo >>` glues its JSON onto the previous line and silently corrupts the JSONL. If in doubt, repair first:
+
+```
+tail -c 1 docs/memory/memory-log.jsonl | read -r _ || echo >> docs/memory/memory-log.jsonl
+```
+
 **`type` field** values and when to use them:
 
 | Type | When |
@@ -92,10 +98,18 @@ Add this section to your project's `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, or 
 
 ```markdown
 ## Memory
-For saving context, logging sessions, and managing project memory, see `docs/memory/README.md`.
+This repo keeps persistent context in `docs/memory/`.
+- At the start of a task, read `docs/memory/facts.md` (kept under ~50 lines).
+- When you complete a milestone, make a decision, or hit a pitfall, append to `docs/memory/memory-log.jsonl` — format and triggers in `docs/memory/README.md`.
+- Search past context with `grep -i "<term>" docs/memory/memory-log.jsonl`.
+- Project context belongs in `docs/memory/`, not in your built-in or local memory system. Reserve built-in memory for user preferences only.
 ```
 
-When you say "save memory", "save context", "log session", "remember this", or "has this come up before" — the agent reads this file and knows exactly what to do.
+Each line earns its place:
+
+- **Reading facts at task start** is what makes pitfalls preventive rather than archaeological — an agent that only reads on request will rediscover the pitfall the hard way first. The ~50-line cap on facts.md exists precisely so this read stays cheap.
+- **Inlining the write-triggers** means the agent saves proactively, without needing to open this README first or wait for you to say a magic phrase. (Explicit requests — "save memory", "log session", "has this come up before" — still work too.)
+- **The precedence rule** matters for agents with their own memory systems (e.g., Claude Code's local memory directory). Without it, project context gets split between the repo and a machine-local store — and the local half doesn't survive a reformat or follow a clone.
 
 ### With ADRs (optional)
 

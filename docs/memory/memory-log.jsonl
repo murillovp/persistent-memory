@@ -1,1 +1,3 @@
 {"date":"2026-07-04","type":"log","summary":"Repository initialized with persistent memory layer."}
+{"date":"2026-07-06","type":"decision","summary":"Strengthened CLAUDE.md integration snippet: agents now read facts.md at task start (proactive, not on-request), write-triggers are inlined in the snippet, and a precedence rule routes project context here instead of agent-local memory stores. Repo now dogfoods via its own CLAUDE.md."}
+{"date":"2026-07-06","type":"pitfall","summary":"echo >> silently corrupts memory-log.jsonl if the file lacks a trailing newline: the new JSON object glues onto the last line, breaking JSONL parsing. Ensure the file ends with a newline before appending; validate with python3 json.loads per line."}

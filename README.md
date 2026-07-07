@@ -33,18 +33,21 @@ Any agent can read and write them with basic shell commands. No database, no API
 cp -r docs/memory/ /path/to/your/project/docs/memory/
 
 # 2. Add the integration to your CLAUDE.md / AGENTS.md / .cursorrules
-echo "## Memory" >> CLAUDE.md
-echo 'For saving context, logging sessions, and managing project memory, see `docs/memory/README.md`.' >> CLAUDE.md
-
-# 3. Commit
-git add docs/memory/ && git commit -m "add persistent memory layer"
+cat >> CLAUDE.md <<'EOF'
+## Memory
+This repo keeps persistent context in `docs/memory/`.
+- At the start of a task, read `docs/memory/facts.md` (kept under ~50 lines).
+- When you complete a milestone, make a decision, or hit a pitfall, append to `docs/memory/memory-log.jsonl` — format and triggers in `docs/memory/README.md`.
+- Search past context with `grep -i "<term>" docs/memory/memory-log.jsonl`.
+- Project context belongs in `docs/memory/`, not in your built-in or local memory system. Reserve built-in memory for user preferences only.
+EOF
 ```
 
 That's it. Your first session can write to `memory-log.jsonl` and the next session reads it back.
 
 ## How it works
 
-One file for what's **always true** (facts.md), one file for what **happened** (memory-log.jsonl). The agent reads them on demand — they're never auto-loaded into context, so there's zero token bloat.
+One file for what's **always true** (facts.md), one file for what **happened** (memory-log.jsonl). The agent reads facts.md at the start of a task — a bounded ~50-line cost that puts pitfalls in front of the agent *before* it repeats them. The unbounded log is never auto-loaded; it's grepped on demand, so there's no token bloat as history grows.
 
 ### facts.md
 
