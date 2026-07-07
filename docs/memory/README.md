@@ -35,42 +35,19 @@ Any of these triggers means something should be saved:
 - **Context switch** — switching to a different task or ending a session
 - **A durable fact is confirmed** — something that should always be true about the project
 
-## Commands (shell, no tooling required)
+## Format
 
-### Read facts
-```
-cat docs/memory/facts.md
-```
+No special tooling: read with `cat`, search with `grep`, append with `echo >>`.
 
-### Add a fact
-```
-echo "- The build tool requires Node 20+" >> docs/memory/facts.md
-```
+**`facts.md`** is a plain markdown list — one line per fact.
 
-### Read recent log entries
-```
-tail -5 docs/memory/memory-log.jsonl | sed 's/.*"date":"\([^"]*\)","summary":"\([^"]*\)".*/\1 — \2/'
-```
-
-### Search the log
-```
-grep -i "<search-term>" docs/memory/memory-log.jsonl | sed 's/.*"date":"\([^"]*\)","summary":"\([^"]*\)".*/\1 — \2/'
-```
-
-Log entries with a `summary` field are grep-able — search for feature names, error messages, people, or technologies.
-
-### Add a log entry
-```
-echo '{"date":"2026-07-04","type":"pitfall","summary":"Test runner --watch doesn't pick up new files without restart"}' >> docs/memory/memory-log.jsonl
-```
-
-**Pitfall:** if the file ever loses its trailing newline (some editors strip it), the next `echo >>` glues its JSON onto the previous line and silently corrupts the JSONL. If in doubt, repair first:
+**`memory-log.jsonl`** is one JSON object per line, three fields:
 
 ```
-tail -c 1 docs/memory/memory-log.jsonl | read -r _ || echo >> docs/memory/memory-log.jsonl
+{"date":"2026-07-04","type":"pitfall","summary":"Test runner --watch does not pick up new files without restart"}
 ```
 
-**`type` field** values and when to use them:
+`type` values and when to use them:
 
 | Type | When |
 |------|------|
@@ -80,17 +57,15 @@ tail -c 1 docs/memory/memory-log.jsonl | read -r _ || echo >> docs/memory/memory
 | `fact-archive` | A fact rotated out of `facts.md` to keep it short |
 | `log` | A general session note that doesn't fit above |
 
-All types are grep-able: `grep '"pitfall"' docs/memory/memory-log.jsonl` to see only pitfalls.
+The `summary` is the search surface — `grep -i "<term>"` finds past context, `grep '"pitfall"'` filters by type.
 
-### Compact facts (rotate old entries to the log)
-
-When `facts.md` hits ~50 lines, move the oldest/least-relevant entries to the log as `type: "fact-archive"`:
+**Appending safely:** if the file ever loses its trailing newline (some editors strip it), the next `echo >>` glues its JSON onto the previous line and silently corrupts the JSONL. If in doubt, repair first:
 
 ```
-# Archive a fact
-echo '{"date":"2026-07-04","type":"fact-archive","summary":"Archived from facts.md: Node 20+ requirement"}' >> docs/memory/memory-log.jsonl
-# Then remove that line from facts.md
+tail -c 1 docs/memory/memory-log.jsonl | read -r _ || echo >> docs/memory/memory-log.jsonl
 ```
+
+**Compacting facts:** when `facts.md` approaches ~50 lines, move the oldest or least-relevant entries to the log as `type: "fact-archive"` entries, then delete them from `facts.md`.
 
 ## Integration with your agent config file
 

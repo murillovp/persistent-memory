@@ -70,19 +70,9 @@ Kept under ~50 lines. When it grows, the oldest entries get archived to memory-l
 
 Append-only, so git merges cleanly across devices. Each line has a `type` (completion, decision, pitfall, fact-archive, log) and a grep-able `summary`.
 
-## Commands cheat sheet
+## Working with the files
 
-Your coding agent runs these automatically — triggered by your request to save memory, search context, or recall past sessions. You don't type them yourself.
-
-| What | Command |
-|------|---------|
-| Read facts | `cat docs/memory/facts.md` |
-| Add a fact | `echo "- fact goes here" >> docs/memory/facts.md` |
-| Recent log | `tail -5 docs/memory/memory-log.jsonl \| sed 's/.*"date":"\([^"]*\)","summary":"\([^"]*\)".*/\1 — \2/'` |
-| Search log | `grep -i "term" docs/memory/memory-log.jsonl \| sed 's/.*"date":"\([^"]*\)","summary":"\([^"]*\)".*/\1 — \2/'` |
-| Add log entry | `echo '{"date":"$(date +%F)","type":"pitfall","summary":"..."}' >> docs/memory/memory-log.jsonl` |
-| Filter by type | `grep '"decision"' docs/memory/memory-log.jsonl` |
-| Compact facts | Archive oldest entries to log as `type: "fact-archive"`, remove from facts.md |
+There are no commands to memorize. Agents read with `cat`, search with `grep`, and append with `echo >>` — tools every agent already has. The full contract — entry format, `type` values, when to write, do's and don'ts — lives in [`docs/memory/README.md`](docs/memory/README.md), which is the same file your agent gets pointed to.
 
 ## Why JSONL over SQLite
 
@@ -93,7 +83,7 @@ Your coding agent runs these automatically — triggered by your request to save
 | Readable in PRs | Yes — plain text diffs | No — binary blob | Yes |
 | Zero tooling | Yes | No | Yes |
 | Token cost when idle | Zero (queried on demand) | Zero (queried on demand) | **High if auto-loaded** — agents commonly auto-inject .md into context |
-| Structured queries | grep + jq for basic filtering | SQL | grep only — no structured fields |
+| Structured queries | grep for basic filtering | SQL | grep only — no structured fields |
 | Scale limit | ~10K entries | Unlimited | ~1K lines before grep slows |
 | Fields | Structured (type, date, summary) | Fully structured | None — plain prose |
 
